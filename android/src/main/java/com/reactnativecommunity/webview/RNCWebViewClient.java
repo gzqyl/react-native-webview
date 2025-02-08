@@ -25,6 +25,8 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.UIManagerHelper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reactnativecommunity.webview.events.TopHttpErrorEvent;
 import com.reactnativecommunity.webview.events.TopLoadingErrorEvent;
 import com.reactnativecommunity.webview.events.TopLoadingFinishEvent;
@@ -324,5 +326,55 @@ public class RNCWebViewClient extends WebViewClient {
 
     public void setProgressChangedFilter(RNCWebView.ProgressChangedFilter filter) {
         progressChangedFilter = filter;
+    }
+
+     @Override
+    public WebResourceResponse shouldInterceptRequest(final WebView view, String url) {
+
+        /**
+         * window.ReactNativeWebView.postMessage(JSON.stringify({
+         *                         videoname: String(document.title),
+         *                         videourl: String(videoEl[k].src),
+         *                         weburl: String(window.location.href)
+         *                     }));
+         */
+
+        if (url.contains(".m3u8") || url.contains(".mp4")){
+
+            view.post(new Runnable() {
+                @Override
+                public void run() {
+
+                    WritableMap message = Arguments.createMap();
+                    message.putString("videoname", view.getTitle());
+                    message.putString("videourl", url);
+                    message.putString("weburl", view.getUrl());
+
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    try {
+                        String jacksonData = objectMapper.writeValueAsString(message);
+
+
+                        WritableMap data = Arguments.createMap();
+                        data.putString("data", jacksonData);
+                        dispatchEvent(view, new TopMessageEvent(RNCWebViewWrapper.getReactTagFromWebView(view), data));
+
+
+                    } catch (JsonProcessingException ignored) {
+
+                    }
+
+
+                }
+            });
+
+        }
+
+        return null;
+    }
+
+    protected void dispatchEvent(WebView webView, Event event) {
+        int reactTag = RNCWebViewWrapper.getReactTagFromWebView(webView);
+        UIManagerHelper.getEventDispatcherForReactTag((ReactContext) webView.getContext(), reactTag).dispatchEvent(event);
     }
 }
