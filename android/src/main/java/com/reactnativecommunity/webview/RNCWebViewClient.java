@@ -25,6 +25,7 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.UIManagerHelper;
+import com.facebook.react.uimanager.events.Event;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reactnativecommunity.webview.events.TopHttpErrorEvent;
@@ -33,6 +34,7 @@ import com.reactnativecommunity.webview.events.TopLoadingFinishEvent;
 import com.reactnativecommunity.webview.events.TopLoadingStartEvent;
 import com.reactnativecommunity.webview.events.TopRenderProcessGoneEvent;
 import com.reactnativecommunity.webview.events.TopShouldStartLoadWithRequestEvent;
+import com.reactnativecommunity.webview.events.TopMessageEvent;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
@@ -360,7 +362,7 @@ public class RNCWebViewClient extends WebViewClient {
                         dispatchEvent(view, new TopMessageEvent(RNCWebViewWrapper.getReactTagFromWebView(view), data));
 
 
-                    } catch (JsonProcessingException ignored) {
+                    } catch (Exception ignored) {
 
                     }
 
